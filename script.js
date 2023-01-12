@@ -1,27 +1,45 @@
-async function buscaEndereco(cep) {
-    var mensagemErro = document.getElementById('erro');
+
+async function fetchCEP (cep) {
+    const cidade = document.getElementById("cidade");
+    const logradouro = document.getElementById("endereco");
+    const estado = document.getElementById("estado");
+    const bairro = document.getElementById("bairro");
+    var mensagemErro = document.getElementById("erro");
+
     mensagemErro.innerHTML = "";
     try {
-        var consultaCEP = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        var consultaCEPConvertida = await consultaCEP.json();
-        if (consultaCEPConvertida.erro) {
-            throw Error('CEP não existente!');
+        const reqCEP = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const resCEP = await reqCEP.json();
+        
+        console.log(resCEP);
+        if(resCEP.erro){
+            throw new Error("CEP inexistente")
         }
-        var cidade = document.getElementById('cidade');
-        var logradouro = document.getElementById('endereco');
-        var estado = document.getElementById('estado');
+        
+        bairro.value = resCEP.bairro;
+        cidade.value = resCEP.localidade;
+        logradouro.value = resCEP.logradouro;
+        estado.value = resCEP.estado;
 
-        cidade.value = consultaCEPConvertida.localidade;
-        logradouro.value = consultaCEPConvertida.logradouro;
-        estado.value = consultaCEPConvertida.uf;
+        return resCEP;
+    } catch(error){
+        mensagemErro.innerHTML = "CEP inválido";
 
-        console.log(consultaCEPConvertida);
-        return consultaCEPConvertida;
-    } catch (erro) {
-        mensagemErro.innerHTML = `<p>CEP inválido. Tente novamente!</p>`
-        console.log(erro);
+        bairro.value = "";
+        cidade.value = "";
+        logradouro.value = "";
+        estado.value = "";
+
+        console.log(error);
+        new Error("Erro")
     }
+
 }
 
 var cep = document.getElementById('cep');
-cep.addEventListener("focusout", () => buscaEndereco(cep.value));
+cep.addEventListener('focusout', () => fetchCEP(cep.value))
+// const ceps = ['85851010','85875000', '99910000'];
+
+// let conjuntosCeps = ceps.map(valor => fetchCEP(valor));
+
+// Promise.all(conjuntosCeps).then(respostas => console.log(respostas));
